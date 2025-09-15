@@ -1,0 +1,25 @@
+tôi muốn viết 1 chương trình tự động 1 cắt video thành nhiều video mp4 và lưu từng video đó lại
+
+cụ thể và điều kiện cắt video như sau:
+video đầu vào là 1 video mp4 dài, trong video có nhiều trận đấu.
+
+mỗi khi bắt đầu 1 trận đấu, sẽ có 1 banner lớn màu xám.
+kết thúc hiệp đấu sẽ là banner lớn màu đỏ, hoặc xanh bích, hoặc xanh lá cây
+đỏ là đội Đỏ thắng
+xanh dương là đội Xanh thắng
+xanh lá cây là Hòa
+
+tôi muốn viết chương trình tự động cắt video thành nhiều video mỗi trận đấu đó
+ý tưởng của tôi là:
+tôi sẽ quét toàn bộ để tìm ra các mốc thời gian của banner xám và banner đỏ, xanh bích, xanh lá cây để biết điểm bắt đầu vào kết thúc của video mỗi trận đấu
+cùng với đó là biết dc kết quả của trận dấu dựa vào banner đỏ, xanh bích, xanh lá cây
+
+sau đó tách và lưu các đoạn video dựa vào các mốc thời gian đã tìm được. tên video sẽ là:  + thời gian ngày hôm nay + số ngẫu nhiên 3 chữ số
+trong đó kết quả trận đấu có giá trị X hoặc D hoặc H (X là đội Xanh thắng, D là đội Đỏ thắng, H là Hòa)
+
+cách làm của tôi có ổn không
+
+
+
+
+
