@@ -1,0 +1,18 @@
+{
+    "x1": 37,
+    "y1": 146,
+    "x2": 1098,
+    "y2": 741,
+    "x_open_bet": 144,
+    "y_open_bet": 1345,
+    "x_close_bet": 237,
+    "y_close_bet": 1350,
+    "x_meron_win": 348,
+    "y_meron_win": 1344,
+    "x_wala_win": 462,
+    "y_wala_win": 1343,
+    "x_draw": 528,
+    "y_draw": 1345,
+    "x_cancel": 616,
+    "y_cancel": 1342
+}

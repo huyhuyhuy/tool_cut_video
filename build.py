@@ -6,7 +6,7 @@ import sys
 def clean_build():
     """Xóa các thư mục build cũ"""
     dirs_to_clean = ['build', 'dist', '__pycache__']
-    files_to_clean = ['VideoProcessor.spec', 'VideoProcessorAutoDetect.spec']
+    files_to_clean = ['VideoProcessor.spec']
     
     for dir_name in dirs_to_clean:
         if os.path.exists(dir_name):
@@ -19,28 +19,28 @@ def clean_build():
             os.remove(file_name)
 
 def install_requirements():
-    """Cài đặt các thư viện cần thiết"""
+    """Cài đặt các thư viện cần thiết với version tương thích"""
     print("Đang cài đặt các thư viện...")
-    try:
-        subprocess.run(['pip', 'install', '-r', 'requirements.txt'], check=True)
-    except subprocess.CalledProcessError:
-        print("Lỗi cài đặt requirements. Thử cài đặt thủ công...")
-        # Cài đặt các thư viện chính
-        packages = [
-            'opencv-python==4.9.0.80',
-            'numpy==1.26.4',
-            'pyautogui==0.9.54',
-            'pynput==1.7.6',
-            'pillow==10.2.0',
-            'mss==9.0.1',
-            'pyinstaller==6.4.0'
-        ]
-        for package in packages:
-            try:
-                subprocess.run(['pip', 'install', package], check=True)
-                print(f"Đã cài đặt {package}")
-            except subprocess.CalledProcessError as e:
-                print(f"Lỗi cài đặt {package}: {e}")
+    
+    # Cài đặt từng package riêng để tránh conflict
+    packages = [
+        'opencv-python',
+        'numpy<2.0',      # Tránh NumPy 2.x conflict
+        'pyautogui',
+        'pynput',
+        'pillow',
+        'mss',
+        'pyinstaller'
+    ]
+    
+    for package in packages:
+        try:
+            print(f"Đang cài đặt {package}...")
+            subprocess.run(['pip', 'install', package], check=True, capture_output=True)
+            print(f"✅ Đã cài đặt {package}")
+        except subprocess.CalledProcessError as e:
+            print(f"⚠️  Lỗi cài đặt {package}, tiếp tục...")
+            continue
 
 def check_files():
     """Kiểm tra các file cần thiết"""
@@ -51,7 +51,10 @@ def check_files():
         'config.json',
         'fight_number_template.png',
         'fight_number_template2.png',
-        'fight_number_template3.png'
+        'fight_number_template3.png',
+        'template_do_new.png',
+        'template_xanh_new.png',
+        'template_hoa_new.png'
     ]
     
     missing_files = []
@@ -66,6 +69,48 @@ def check_files():
         return False
     
     print("✅ Tất cả file cần thiết đã có")
+    return True
+
+def test_dependencies():
+    """Test các dependencies đã cài đúng chưa"""
+    print("🧪 Testing dependencies...")
+    
+    try:
+        import cv2
+        print(f"✅ OpenCV: {cv2.__version__}")
+    except ImportError as e:
+        print(f"❌ OpenCV lỗi: {e}")
+        return False
+    
+    try:
+        import numpy
+        print(f"✅ NumPy: {numpy.__version__}")
+    except ImportError as e:
+        print(f"❌ NumPy lỗi: {e}")
+        return False
+    
+    try:
+        import pyautogui
+        print(f"✅ PyAutoGUI: {pyautogui.__version__}")
+    except ImportError as e:
+        print(f"❌ PyAutoGUI lỗi: {e}")
+        return False
+    
+    try:
+        import pynput
+        print("✅ PyNput: OK")
+    except ImportError as e:
+        print(f"❌ PyNput lỗi: {e}")
+        return False
+    
+    try:
+        import mss
+        print("✅ MSS: OK")
+    except ImportError as e:
+        print(f"❌ MSS lỗi: {e}")
+        return False
+    
+    print("✅ Tất cả dependencies OK!")
     return True
 
 def build_exe():
@@ -88,16 +133,21 @@ a = Analysis(
         ('fight_number_template.png', '.'),
         ('fight_number_template2.png', '.'),
         ('fight_number_template3.png', '.'),
+        ('template_do_new.png', '.'),
+        ('template_xanh_new.png', '.'),
+        ('template_hoa_new.png', '.'),
     ],
     hiddenimports=[
         'cv2',
         'numpy',
+        'numpy.core.multiarray',
+        'numpy.core._methods',
+        'numpy.lib.format',
         'pyautogui',
         'pynput',
         'pynput.mouse',
         'pynput.keyboard',
         'mss',
-        'mss.mss',
         'tkinter',
         'tkinter.ttk',
         'tkinter.filedialog',
@@ -131,7 +181,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='VideoProcessorAutoDetect',
+    name='VideoProcessor',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -149,27 +199,27 @@ exe = EXE(
 '''
     
     # Lưu spec file
-    with open('VideoProcessorAutoDetect.spec', 'w', encoding='utf-8') as f:
+    with open('VideoProcessor.spec', 'w', encoding='utf-8') as f:
         f.write(spec_content)
     
     # Build với spec file
     subprocess.run([
         'pyinstaller',
         '--noconfirm',
-        'VideoProcessorAutoDetect.spec'
+        'VideoProcessor.spec'
     ], check=True)
 
 def create_requirements():
     """Tạo file requirements.txt nếu chưa có"""
     if not os.path.exists('requirements.txt'):
         print("Tạo file requirements.txt...")
-        requirements = '''opencv-python==4.9.0.80
-numpy==1.26.4
-pyinstaller==6.4.0
-pyautogui==0.9.54
-pynput==1.7.6
-pillow==10.2.0
-mss==9.0.1
+        requirements = '''opencv-python
+numpy<2.0
+pyinstaller
+pyautogui
+pynput
+pillow
+mss
 '''
         with open('requirements.txt', 'w', encoding='utf-8') as f:
             f.write(requirements)
@@ -177,11 +227,8 @@ mss==9.0.1
 
 def main():
     try:
-        print("🚀 Bắt đầu quá trình build VideoProcessor Auto Detect...")
+        print("🚀 Bắt đầu quá trình build VideoProcessor...")
         print("=" * 50)
-        
-        # Tạo requirements.txt nếu chưa có
-        create_requirements()
         
         # Kiểm tra file cần thiết
         if not check_files():
@@ -194,24 +241,35 @@ def main():
         # Cài đặt requirements
         install_requirements()
         
+        # Test dependencies
+        if not test_dependencies():
+            print("\n❌ Dependencies không hoạt động!")
+            print("Hãy cài đặt lại: pip install opencv-python numpy<2.0 pyautogui pynput pillow mss pyinstaller")
+            return 1
+        
         # Build exe
         build_exe()
         
         print("\n" + "=" * 50)
-        print("✅ Build thành công!")
-        print("📁 File exe được tạo tại: dist/VideoProcessorAutoDetect.exe")
-        print("\n📋 Hướng dẫn sử dụng:")
-        print("1. Copy file exe và các file .png template vào cùng thư mục")
-        print("2. Chạy VideoProcessorAutoDetect.exe")
-        print("3. Chọn thư mục video hoặc dùng Auto Detect")
+        print("✅ BUILD THÀNH CÔNG!")
+        print("📁 File exe: dist/VideoProcessor.exe")
+        print("\n📋 Hướng dẫn:")
+        print("1. Copy file VideoProcessor.exe sang máy khác")
+        print("2. Chạy VideoProcessor.exe (không cần cài Python)")
+        print("3. Chọn thư mục video và xử lý")
+        print("4. 'Bắt đầu xử lý' - video có banner START")
+        print("5. 'Bắt đầu xử lý (New)' - video không có banner START")
+        print("\n⚠️  Nếu exe không chạy trên máy khác:")
+        print("   - Cài Visual C++ Redistributable 2015-2022")
+        print("   - Chạy với quyền Administrator")
+        print("   - Tạm tắt Windows Defender")
         
     except Exception as e:
-        print(f"\n❌ Lỗi trong quá trình build: {str(e)}")
-        print("\n🔧 Thử các bước sau:")
-        print("1. Cài đặt Python 3.8+")
-        print("2. Cài đặt pip: python -m ensurepip --upgrade")
-        print("3. Cài đặt PyInstaller: pip install pyinstaller")
-        print("4. Chạy lại: python build.py")
+        print(f"\n❌ Lỗi build: {str(e)}")
+        print("\n🔧 Giải pháp:")
+        print("1. Cài đặt Visual Studio Build Tools")
+        print("2. Hoặc dùng Python 3.9-3.11 thay vì 3.13")
+        print("3. Cài đặt lại: pip install opencv-python numpy<2.0")
         return 1
     return 0
 
